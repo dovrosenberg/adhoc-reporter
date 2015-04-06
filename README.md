@@ -46,6 +46,22 @@ Parameters:
       }
 
    Note that you only need to include fields that you want to be reportable here.  You DO NOT need to include key fields unless you want the user to actually see the values of those fields.
+* foreignKeys (required, if there are any connections between collections): an object describing the ways in which collections are connected.  Has the format:
+
+       {
+         'Books': [           // Meteor collection name (matches value in collections)
+            {
+               localKey: 'authorID',   // the field in this collection that connect it to the other
+               to: 'Authors',          // the collection to which this is connected
+               foreignKey: '_id',      // the field in "to" on which to match
+               name: 'Author',         // a descriptor for this connection when viewing it from this side (i.e. "a Book has an Author")
+               reverseName: 'Books'    // a descriptor for this connection when viewing it from the other side (i.e. "an Author has one or more Books")
+            },
+            ...
+         ]
+      }
+
+   Note: keys need only be described in one collection, as they are reversed by the package.  That is, you would not need to describe the relationship shown above under the "Authors" collection as well.  
 * tableDOM: a string to be passed to the dom property of the DataTable containing the results (see https://datatables.net/reference/option/dom for more information.)  And DataTables extensions (css and js) you require should be placed into your /client/compatibility directory.
 * glyphicons (not required, but defaults to Font Awesome): if true, uses Glyphicons for the collapsible panel icons; if false, uses Font Awesome
 
