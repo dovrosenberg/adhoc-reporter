@@ -25,7 +25,7 @@ The beginnings of an ad hoc reporter package for meteor
 
 To install:
 
-      meteor add dovrosenberg:ad-hoc-reporter
+`meteor add dovrosenberg:ad-hoc-reporter`
 
 To use:
 
@@ -34,34 +34,35 @@ To use:
 Parameters:
 * collections (required): an array of the the collections you want to include as options to report on.  The format of each collection is:
 
-      {
-           name: 'Books',       // should be the name of the Meteor collection object
-           label: 'Books'       // the text to display the user when referring to the collection
+        {
+            name: 'Books',       // should be the name of the Meteor collection object
+            label: 'Books'       // the text to display the user when referring to the collection
         }
+
 * schemas (required): an array showing the fields you want to include; this array must match collections in size and order, i.e. schemas[0] contains the fields that go with collections[0].  The format of each schema is:
 
-      {
-         title: {                 // the field name
-            label: 'Title'        // the text label to display the user when referring to this field
-         },
-         ...
-      }
+        {
+            title: {                 // the field name
+                label: 'Title'        // the text label to display the user when referring to this field
+            },
+            ...
+        }
 
    Note that you only need to include fields that you want to be reportable here.  You DO NOT need to include key fields unless you want the user to actually see the values of those fields.
 * foreignKeys (required, if there are any connections between collections): an object describing the ways in which collections are connected.  Has the format:
 
-       {
-         'Books': [           // Meteor collection name (matches value in collections)
-            {
-               localKey: 'authorID',   // the field in this collection that connect it to the other
-               to: 'Authors',          // the collection to which this is connected
-               foreignKey: '_id',      // the field in "to" on which to match
-               name: 'Author',         // a descriptor for this connection when viewing it from this side (i.e. "a Book has an Author")
-               reverseName: 'Books'    // a descriptor for this connection when viewing it from the other side (i.e. "an Author has one or more Books")
-            },
-            ...
-         ]
-      }
+        {
+            'Books': [           // Meteor collection name (matches value in collections)
+                {
+                    localKey: 'authorID',   // the field in this collection that connect it to the other
+                    to: 'Authors',          // the collection to which this is connected
+                    foreignKey: '_id',      // the field in "to" on which to match
+                    name: 'Author',         // a descriptor for this connection when viewing it from this side (i.e. "a Book has an Author")
+                    reverseName: 'Books'    // a descriptor for this connection when viewing it from the other side (i.e. "an Author has one or more Books")
+               },
+               ...
+           ]
+        }
 
    Note: keys need only be described in one collection, as they are reversed by the package.  That is, you would not need to describe the relationship shown above under the "Authors" collection as well.  
 * tableDOM: a string to be passed to the dom property of the DataTable containing the results (see https://datatables.net/reference/option/dom for more information.)  And DataTables extensions (css and js) you require should be placed into your /client/compatibility directory.
