@@ -25,7 +25,7 @@ The beginnings of an ad hoc reporter package for meteor
 
 To install:
 
-      meteor add dovrosenberg:addhoc-reporter
+      meteor add dovrosenberg:ad-hoc-reporter
 
 To use:
 
