@@ -31,9 +31,9 @@ Package.onUse(function(api) {
   api.use([
      'standard-app-packages',    // TODO: maybe just include the ones we really need
      'reactive-var',
-     'uzumaxy:jstree',
-     //'aldeed:tabular'
-     'mizzao:user-status'
+     'uzumaxy:jstree@3.0.9'
+     //'aldeed:tabular'          // TODO: reincorporate once pull request is merged
+     //'mizzao:user-status'      // TODO: use this to automatically clean up query results on server when user logs out
   ]);
 
 // tabular

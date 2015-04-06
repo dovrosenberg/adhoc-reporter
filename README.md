@@ -9,10 +9,12 @@ The beginnings of an ad hoc reporter package for meteor
 * Based on a defined schema, identifies all possible paths between collections and automatically joins tables correctly without user intervention
 * DataTables for output supports sorting, paging, exporting to Excel/pdf/etc
 
-## Future features (in progress)
+## Future features
+* Prettify the package appearance generally (better loading screens, etc.)
 * Allow specification of field types (currency, date, etc.) and apply custom formatting to output based on those field types
 * Allow filtering, grouping, formula fields
 * Support subdocuments
+* Add some tests for package maintenance
 * More to come once those are done
 
 ## Known bugs
