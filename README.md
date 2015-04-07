@@ -18,8 +18,7 @@ The beginnings of an ad hoc reporter package for meteor
 * More to come once those are done
 
 ## Known bugs
-* Doesn't actually work yet :)  There's a (believed to be minor) bug in joining >2 tables that is currently being investigated.
-* Doesn't support adding tables that can be added to the join in more than one place
+* Doesn't support user selecting collections that can be added to the join in more than one place
 
 ## Getting Started
 

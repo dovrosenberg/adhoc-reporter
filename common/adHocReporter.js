@@ -9,9 +9,6 @@ Meteor.startup(function(){
    TabularTables.Results = new ReactiveVar();
    TabularTables.Results.set(null);
 
-   // make sure collection exists
-   if (Meteor.isServer && ReporterResults.find({},{limit:1}).count()===0)
-      ReporterResults.insert({});
    if (Meteor.isClient) {
       Meteor.subscribe('reporterResultsReady');
       Meteor.subscribe('reporterResults');      // just so we can have access to the collection
@@ -76,9 +73,8 @@ loadAllData = function(ID, selectedKeys, selectedFields) {
    // pick a collection to start
    if (selectedKeys.length===0) {
       // single collection - pull from fields
-      console.log('Single collection loading: ' + selectedFields[0].data);
       colName = selectedFields[0].data.collectionName;
-      cumulativeData = loadCollection(ID, colName, fieldsByCol[colName]);
+      cumulativeData = loadCollection(colName, fieldsByCol[colName]);
    } else {
       // go through keys to make a list for each collection of all the key fields
       //    needed
@@ -102,7 +98,9 @@ loadAllData = function(ID, selectedKeys, selectedFields) {
       colName = unusedKeys[0].from;
       pulledCols.push(colName);
 
-      cumulativeData = loadCollection(ID, colName, fieldsByCol[colName]);
+      cumulativeData = loadCollection(colName, fieldsByCol[colName]);
+
+      debugger;
 
       // as long as any keys are left, find one that touches at least one collection
       //    already loaded and load it
@@ -115,26 +113,25 @@ loadAllData = function(ID, selectedKeys, selectedFields) {
          for (var i=0; i<unusedKeys.length; i++) {
             if (_.contains(pulledCols, unusedKeys[i].from)) {
                nextCol = unusedKeys[i].to;
-               pulledCols.push(unusedKeys[i].to);
-               nextKey = unusedKeys[i];
-               unusedKeys.splice(i,1);
                forward = true;
                break;
             } else if (_.contains(pulledCols, unusedKeys[i].from)) {
                nextCol = unusedKeys[i].from;
-               pulledCol.push(unusedKeys[i].from);
-               nextKey = unusedKeys[i];
-               unusedKeys.splice(i,1);
                forward = false;
                break;
             }
          }
          if (!nextCol)     // something went wrong
             throw "Error - cannot find a matching key";
+         else {
+            pulledCols.push(nextCol);
+            nextKey = unusedKeys[i];
+            unusedKeys.splice(i,1);
+         }
 
          // load the collection, including any key fields
          var fields = fieldsByCol[nextCol];
-         var newData = loadCollection(ID, nextCol, fields);
+         var newData = loadCollection(nextCol, fields);
 
          // merge it to cumulative data
          cumulativeData = innerJoin(cumulativeData, newData,
@@ -148,20 +145,18 @@ loadAllData = function(ID, selectedKeys, selectedFields) {
    pushDataToResults(ID, cumulativeData);
 };
 
-loadCollection = function(ID, collectionName, collectFields) {
+loadCollection = function(collectionName, collectFields) {
    var retval = [];
    var fields={};
    _.each(collectFields, function(field) {
       fields[field] = 1;
    });
 
-   //console.log('About to load: ' + collectionName);
-
    _.each(
       // have to rename all the fields when they come back in
       getCollection(collectionName).find({},{fields: fields}).fetch(),
       function(item) {
-         var data={queryID: ID};
+         var data={};
 
          _.each(collectFields, function(field) {
             data[field+':'+collectionName] = item[field];
@@ -177,6 +172,7 @@ loadCollection = function(ID, collectionName, collectFields) {
 
 pushDataToResults = function(ID, cumulativeData) {
    _.each(cumulativeData, function(data) {
+      data.queryID = ID;
       ReporterResults.insert(data);
    });
 
