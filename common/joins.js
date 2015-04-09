@@ -30,34 +30,3 @@ innerJoin = function(from, to, localKey, foreignKey) {
 
     return c;
 };
-
-// returns an object (with keys='.' + ID)
-/*innerJoin = function(array1, array1, key1, key2, fields1, fields2) {
-    var together = [];//, length = 0;
-
-    function add1(item) {
-        var key = '.' + item[key1];
-        var obj = {};
-        if (!together[key])
-            together[key] = obj;
-         //together[length++] = pobj;
-        //pobj = together[key];
-        for (var k in fields1)
-            obj[k] = item[k];
-    }
-    function add2(item) {
-        var pkey = '.'+item[key2];
-        var obj = {};
-        if (!together[pkey])
-            together[pkey] = pobj;
-        //together[length++] = pobj;
-        //pobj = together[pkey];
-        for (var k in fields2)
-            obj[k] = item[k];
-    }
-    _.each(array1, add1);
-    _.each(array2, add2);
-
-    return together;
-};
-*/

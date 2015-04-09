@@ -39,6 +39,9 @@ Meteor.methods({
 
 
 getCollection = function (string) {
+   if (string==='Users')
+      return Meteor.users;
+
    for (var globalObject in this) {
       if (this[globalObject] instanceof Meteor.Collection && globalObject === string)
          return (this[globalObject]);
@@ -100,8 +103,6 @@ loadAllData = function(ID, selectedKeys, selectedFields) {
 
       cumulativeData = loadCollection(colName, fieldsByCol[colName]);
 
-      debugger;
-
       // as long as any keys are left, find one that touches at least one collection
       //    already loaded and load it
       while (unusedKeys.length>0) {
@@ -115,7 +116,7 @@ loadAllData = function(ID, selectedKeys, selectedFields) {
                nextCol = unusedKeys[i].to;
                forward = true;
                break;
-            } else if (_.contains(pulledCols, unusedKeys[i].from)) {
+            } else if (_.contains(pulledCols, unusedKeys[i].to)) {
                nextCol = unusedKeys[i].from;
                forward = false;
                break;

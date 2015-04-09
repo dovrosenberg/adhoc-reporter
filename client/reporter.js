@@ -96,11 +96,12 @@ Template.reporter.rendered = function(){
          isLoading.set(true);
 
          if (addCollection) {
-            template.selectedCollections.push(clickedCollection);
 
             // see if we're turning this node on or off
             if (curNode.state.selected) {
                // turning on - disable any trees no longer available
+               template.selectedCollections.push(clickedCollection);
+
                if (template.selectedCollections.length===1) {
                   // save the collection of the 1st item picked---we use it to filter
                   //   possible keySets when we pick the 2nd item
@@ -128,8 +129,8 @@ Template.reporter.rendered = function(){
                   if (cleanedSets.length>1) {
                      // show the different possibilities - get a cleaned up list of choices
                      //    and then let the user pick from them
-                     // TODO: need to store the node that each possibleset matched to be 'from'
-                     //_.each(cleanedSets, function(set) { console.log(createPathFromKeySet(set)); });
+                     _.each(cleanedSets, function(set) { console.log(createStringFromPath(createPathFromKeySet(template.allKeys, set, template.selectedKeys, clickedCollection, template.originalNode))); });
+                     chosenKeySet = cleanedSets[0];
                   } else
                      chosenKeySet = cleanedSets[0];
 

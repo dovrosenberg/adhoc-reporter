@@ -10,6 +10,7 @@ The beginnings of an ad hoc reporter package for meteor
 * DataTables for output supports sorting, paging, exporting to Excel/pdf/etc
 
 ## Future features
+* Drag and drop fields into the report because multi-select interface is non-obvious
 * Prettify the package appearance generally (better loading screens, etc.)
 * Allow specification of field types (currency, date, etc.) and apply custom formatting to output based on those field types
 * Allow filtering, grouping, formula fields
@@ -17,8 +18,12 @@ The beginnings of an ad hoc reporter package for meteor
 * Add some tests for package maintenance
 * More to come once those are done
 
+## Other things perhaps it should do (but not even on the roadmap yet)
+* Make UI more template driven for better visual integration into Meteor apps
+
 ## Known bugs
 * Doesn't support user selecting collections that can be added to the join in more than one place
+* Doesn't support removing fields from the report
 
 ## Getting Started
 

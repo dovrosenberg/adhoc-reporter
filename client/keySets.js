@@ -67,99 +67,137 @@ addToKeySets = function(allKeySets, keySetsByCollection, canReachFromCollection,
       keySetsByCollection[keyDescriptor.to] = [];
    if (!keySetsByCollection[keyDescriptor.from])
       keySetsByCollection[keyDescriptor.from] = [];
+   if (!canReachFromCollection[keyDescriptor.from])
+      canReachFromCollection[keyDescriptor.from] = [];
+   if (!canReachFromCollection[keyDescriptor.to])
+      canReachFromCollection[keyDescriptor.to] = [];
 
    _.each(keySetObject.collections, function(item) {
       keySetsByCollection[item].push(keySetObject);
 
       if (!canReachFromCollection[item]) canReachFromCollection[item] = [];
-      if (item!==keyDescriptor.from &&
-            !_.contains(canReachFromCollection[item], keyDescriptor.from))
-         canReachFromCollection[item].push(keyDescriptor.from);
+      if (item!==keyDescriptor.from) {
+         if (!_.contains(canReachFromCollection[item], keyDescriptor.from))
+            canReachFromCollection[item].push(keyDescriptor.from);
+         if (!_.contains(canReachFromCollection[keyDescriptor.from], item))
+            canReachFromCollection[keyDescriptor.from].push(item);
+      }
 
-      if (!canReachFromCollection[item]) canReachFromCollection[item] = [];
-      if (item!==keyDescriptor.to &&
-            !_.contains(canReachFromCollection[item], keyDescriptor.to))
-         canReachFromCollection[item].push(keyDescriptor.to);
+      if (item!==keyDescriptor.to) {
+         if (!_.contains(canReachFromCollection[item], keyDescriptor.to))
+            canReachFromCollection[item].push(keyDescriptor.to);
+            if (!_.contains(canReachFromCollection[keyDescriptor.to], item))
+               canReachFromCollection[keyDescriptor.to].push(item);
+      }
    });
 
    // and add to master list
    allKeySets.push(keySetObject);
 };
 
-// TODO: handle cases where there are extraneous keys in the set
 // given a keyset containing collections from and to, returns an array
 //    which is an ordered set of the keys that starts at from, ends at to,
 //    and where each key is oriented in the proper direction
-createPathFromKeySet = function(allKeys, keys, from, to) {
+// assumes there are no extraneous keys (because it's been cleaned ahead of time)
+// from is only used if there are no priorKeys
+createPathFromKeySet = function(allKeys, keys, priorKeys, to, from) {
    var keysRemaining;
    var retval = [];
    var toKey;
-   var l = keys.length;
+   var i,l;
    var keyToCheck;
+   var lastStep;
+   var finalKey;
 
    // pull all the key details
    keysRemaining = _.map(keys, function(key) {
       return allKeys[key];
    });
 
-   // find the key with 'from' in it
-   for (var i=0; i<l; i++) {
-      keyToCheck = keysRemaining[i];
-      if (keyToCheck.from===from) {
-         retval.push(keyToCheck);
-         keysRemaining.splice(i,1);
-         break;
-      } else if (keyToCheck.to===from) {
-         retval.push(reverseKey(keyToCheck));
-         keysRemaining.splice(i,1);
-         break;
-      }
-   }
+   // find the starting collection...
+   // TODO: I think there should only be one key that touches a key
+   //    already in the set and the point it touches must be the starting
+   //    point... I can't prove that's the case, though, which could cause
+   //    this not to work
+   l=keysRemaining.length;
 
-   // find the key with 'to' in it
-   l = keysRemaining.length;
-   for (i=0; i<l; i++) {
-      keyToCheck = keysRemaining[i];
-      if (keyToCheck.to===to) {
-         retval.push(keyToCheck);
-         keysRemaining.splice(i,1);
-         break;
-      } else if (keyToCheck.from===to) {
-         retval.push(reverseKey(keyToCheck));
-         keysRemaining.splice(i,1);
-         break;
-      }
-   }
+   if (l>0) {
+      if (priorKeys.length===0) {
+         lastStep = from;
+      } else {
+         l = keysRemaining.length;
 
-   // need to go through remaining keys to see how they hook up
-   // for now, we only handle simplest case of a straight line
-   var done = false;
-   var lastStep = from;
-   do {
-      // find the step starting at lastStep
-      l = keysRemaining.length;
-      for (i=0; i<l; i++) {
-         keyToCheck = keysRemaining[i];
-         if (keyToCheck.from===from) {
-            keysRemaining.splice(i,1);
-            retval.push(keyToCheck);
-            lastStep = keyToCheck.to;
-            if (lastStep===to)
-               done = true;
-            break;
-         } else if (keyToCheck.to===from) {
-            keysRemaining.splice(i,1);
-            retval.push(verseKey(keyToCheck));
-            lastStep = keyToCheck.from;
-            if (lastStep===to)
-               done = true;
-            break;
+         fromMatchesPriorTo = function(priorKey) {
+            return priorKey.to===keyToCheck.from;
+         };
+         toMatchesPriorFrom = function(priorKey) {
+            return priorKey.from===keyToCheck.to;
+         };
+
+         for (i=0; i<l; i++) {
+            keyToCheck = keysRemaining[i];
+            var matchingKey = _.find(priorKeys, fromMatchesPriorTo);
+
+            // if we found a key in the set that ends where this begins, then keyToCheck
+            //    is the 1st key in our new path
+            if (matchingKey) {
+               lastStep = matchingKey.to;
+               retval.push(keyToCheck);
+               keysRemaining.splice(i,1);
+               break;
+            } else {
+               matchingKey = _.find(priorKeys, toMatchesPriorFrom);
+               if (matchingKey) {
+                  lastStep = matchingKey.from;
+                  retval.push(reverseKey(keyToCheck));
+                  keysRemaining.splice(i,1);
+                  break;
+               }
+            }
          }
       }
-   } while (!done);
 
-   if (keysRemaining.length!==0)
-      throw "Invalid path found in keySet";
+      // need to go through remaining keys to see how they hook up
+      // for now, we only handle simplest case of a straight line
+      var done = false;
+      do {
+         // find the step starting at lastStep
+         l = keysRemaining.length;
+         for (i=0; i<l; i++) {
+            keyToCheck = keysRemaining[i];
+            if (keyToCheck.from===lastStep) {
+               keysRemaining.splice(i,1);
+               retval.push(keyToCheck);
+               lastStep = keyToCheck.to;
+               if (lastStep===to)
+                  done = true;
+               break;
+            } else if (keyToCheck.to===lastStep) {
+               keysRemaining.splice(i,1);
+               retval.push(reverseKey(keyToCheck));
+               lastStep = keyToCheck.from;
+               if (lastStep===to)
+                  done = true;
+               break;
+            }
+         }
+      } while (!done);
+
+      if (keysRemaining.length!==0)
+         throw "Invalid path found in keySet";
+   }
+
+   return retval;
+};
+
+createStringFromPath = function(path) {
+   var retval;
+
+   retval = _.reduce(path, function(str, item, index) {
+      return str + (index!==0 ? '->' :'') + item.from + '(' + item.name + ')';
+   }, '');
+
+   retval += '->' + path[path.length-1].to;
 
    return retval;
 };
