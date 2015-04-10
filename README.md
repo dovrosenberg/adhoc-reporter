@@ -16,22 +16,22 @@ The beginnings of an ad hoc reporter package for meteor
 * Allow filtering, grouping, formula fields
 * Support subdocuments
 * Add some tests for package maintenance
-* More to come once those are done
 
 ## Other things perhaps it should do (but not even on the roadmap yet)
 * Make UI more template driven for better visual integration into Meteor apps
 
 ## Known bugs
-* Doesn't support user selecting collections that can be added to the join in more than one place
 * Doesn't support removing fields from the report
 
 ## Getting Started
 
-To install:
+**To install:**
 
 `meteor add dovrosenberg:ad-hoc-reporter`
 
-To use:
+You also need to have some version of bootstrap 3 installed, including modal.js.  And Font Awesome or Glyphicons (for glyphicon-chevron-down/fa-chevron-down and  glyphicon-chevron-up/fa-chevron-up)
+
+**To use:**
 
     {{> reporter <options>}}
 
@@ -69,10 +69,8 @@ Parameters:
         }
 
    Note: keys need only be described in one collection, as they are reversed by the package.  That is, you would not need to describe the relationship shown above under the "Authors" collection as well.  
-* tableDOM: a string to be passed to the dom property of the DataTable containing the results (see https://datatables.net/reference/option/dom for more information.)  And DataTables extensions (css and js) you require should be placed into your /client/compatibility directory.
+* tableDOM: a string to be passed to the dom property of the DataTable containing the results (see https://datatables.net/reference/option/dom for more information.)  And DataTables extensions (css and js) you require should be placed into your /client/compatibility directory.  And if you want to use the tabletools extension, you should also place the swf file in public/swf.
 * glyphicons (not required, but defaults to Font Awesome): if true, uses Glyphicons for the collapsible panel icons; if false, uses Font Awesome
-
-You also need to have some version bootstrap 3 installed.  And Font Awesome or Glyphicons (for glyphicon-chevron-down/fa-chevron-down and  glyphicon-chevron-up/fa-chevron-up)
 
 
 ## License

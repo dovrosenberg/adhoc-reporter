@@ -1,0 +1,16 @@
+<template name="selectPathBody">
+   <form id="pathForm">
+      {{#each paths}}
+         {{> path }}
+      {{/each}}
+   </form>
+</template>
+
+<template name="path">
+   <div class="radio">
+      <label>
+         <input type="radio" name="pathRadios" id="optionsRadios{{index}}" value="{{index}}" checked="{{checked}}">
+            {{text}}
+      </label>
+   </div>
+</template>

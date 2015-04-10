@@ -18,7 +18,7 @@
 */
 
 addForeignKeyToKeySets = function(allKeySets, keySetsByCollection, canReachFromCollection, keyDescriptor){
-   // note: we don't check for duplicates - instead assuming input data
+   // note: we don't check for duplicate keys - instead assuming input data
    //    doesn't include them
 
    // add to other keySets that contain either collection in this key
@@ -32,7 +32,7 @@ addForeignKeyToKeySets = function(allKeySets, keySetsByCollection, canReachFromC
       // if the keySet contains either the from or to collection, we need to
       //    create a new keySet with the current one plus the key
       if (_.some(keySetToCheck.collections, matchingCollection)) {
-         // just make sure this key isn't already in it
+         // make sure this key isn't already in it
          if (!_.contains(keySetToCheck.keys, keyDescriptor.ID))
             addToKeySets(allKeySets, keySetsByCollection, canReachFromCollection, keySetToCheck, keyDescriptor);
       }
@@ -54,45 +54,62 @@ addToKeySets = function(allKeySets, keySetsByCollection, canReachFromCollection,
    // make a copy of the keySet to adjust, because we're creating a new one
    keySetObject = jQuery.extend(true, {}, keySetToAdjust);
 
-   var collections = keySetObject.collections;
-   if (!_.contains(collections, keyDescriptor.to))
-      collections.push(keyDescriptor.to);
-   if (!_.contains(collections, keyDescriptor.from))
-      collections.push(keyDescriptor.from);
+   var newSet = keySetObject.keys;
+   newSet.push(keyDescriptor.ID);
 
-   keySetObject.keys.push(keyDescriptor.ID);
+   var containedInNewSet = function(key) { return _.contains(newSet,key); };
 
-   // need to add the keySet to each mapping in keySetsByCollection
-   if (!keySetsByCollection[keyDescriptor.to])
-      keySetsByCollection[keyDescriptor.to] = [];
-   if (!keySetsByCollection[keyDescriptor.from])
-      keySetsByCollection[keyDescriptor.from] = [];
-   if (!canReachFromCollection[keyDescriptor.from])
-      canReachFromCollection[keyDescriptor.from] = [];
-   if (!canReachFromCollection[keyDescriptor.to])
-      canReachFromCollection[keyDescriptor.to] = [];
-
-   _.each(keySetObject.collections, function(item) {
-      keySetsByCollection[item].push(keySetObject);
-
-      if (!canReachFromCollection[item]) canReachFromCollection[item] = [];
-      if (item!==keyDescriptor.from) {
-         if (!_.contains(canReachFromCollection[item], keyDescriptor.from))
-            canReachFromCollection[item].push(keyDescriptor.from);
-         if (!_.contains(canReachFromCollection[keyDescriptor.from], item))
-            canReachFromCollection[keyDescriptor.from].push(item);
+   // make sure this keySet doesn't exist already... do that by the keys
+   if (!_.find(allKeySets, function(keySet) {
+      return keySet.keys.length=== keySetObject.keys.length && _.every(keySet.keys, containedInNewSet);
+   })) {
+      // for now, we don't allow loops; so make sure either the from or the to isn't already in the set
+      // (at least one of them will be, because that's why we're adding this key)
+      var collections = keySetObject.collections;
+      var addedCol = false;
+      if (!_.contains(collections, keyDescriptor.to)) {
+         collections.push(keyDescriptor.to);
+         addedCol = true;
       }
-
-      if (item!==keyDescriptor.to) {
-         if (!_.contains(canReachFromCollection[item], keyDescriptor.to))
-            canReachFromCollection[item].push(keyDescriptor.to);
-            if (!_.contains(canReachFromCollection[keyDescriptor.to], item))
-               canReachFromCollection[keyDescriptor.to].push(item);
+      if (!_.contains(collections, keyDescriptor.from)) {
+         collections.push(keyDescriptor.from);
+         addedCol = true;
       }
-   });
+      if (!addedCol)        // both collections already in the list
+         return;
 
-   // and add to master list
-   allKeySets.push(keySetObject);
+      // need to add the keySet to each mapping in keySetsByCollection
+      if (!keySetsByCollection[keyDescriptor.to])
+         keySetsByCollection[keyDescriptor.to] = [];
+      if (!keySetsByCollection[keyDescriptor.from])
+         keySetsByCollection[keyDescriptor.from] = [];
+      if (!canReachFromCollection[keyDescriptor.from])
+         canReachFromCollection[keyDescriptor.from] = [];
+      if (!canReachFromCollection[keyDescriptor.to])
+         canReachFromCollection[keyDescriptor.to] = [];
+
+      _.each(keySetObject.collections, function(item) {
+         keySetsByCollection[item].push(keySetObject);
+
+         if (!canReachFromCollection[item]) canReachFromCollection[item] = [];
+         if (item!==keyDescriptor.from) {
+            if (!_.contains(canReachFromCollection[item], keyDescriptor.from))
+               canReachFromCollection[item].push(keyDescriptor.from);
+            if (!_.contains(canReachFromCollection[keyDescriptor.from], item))
+               canReachFromCollection[keyDescriptor.from].push(item);
+         }
+
+         if (item!==keyDescriptor.to) {
+            if (!_.contains(canReachFromCollection[item], keyDescriptor.to))
+               canReachFromCollection[item].push(keyDescriptor.to);
+               if (!_.contains(canReachFromCollection[keyDescriptor.to], item))
+                  canReachFromCollection[keyDescriptor.to].push(item);
+         }
+      });
+
+      // and add to master list
+      allKeySets.push(keySetObject);
+   }
 };
 
 // given a keyset containing collections from and to, returns an array
@@ -100,6 +117,7 @@ addToKeySets = function(allKeySets, keySetsByCollection, canReachFromCollection,
 //    and where each key is oriented in the proper direction
 // assumes there are no extraneous keys (because it's been cleaned ahead of time)
 // from is only used if there are no priorKeys
+// priorKeys should be list of key IDs
 createPathFromKeySet = function(allKeys, keys, priorKeys, to, from) {
    var keysRemaining;
    var retval = [];
@@ -128,10 +146,10 @@ createPathFromKeySet = function(allKeys, keys, priorKeys, to, from) {
          l = keysRemaining.length;
 
          fromMatchesPriorTo = function(priorKey) {
-            return priorKey.to===keyToCheck.from;
+            return allKeys[priorKey].to===keyToCheck.from;
          };
          toMatchesPriorFrom = function(priorKey) {
-            return priorKey.from===keyToCheck.to;
+            return allKeys[priorKey].from===keyToCheck.to;
          };
 
          for (i=0; i<l; i++) {
@@ -141,14 +159,14 @@ createPathFromKeySet = function(allKeys, keys, priorKeys, to, from) {
             // if we found a key in the set that ends where this begins, then keyToCheck
             //    is the 1st key in our new path
             if (matchingKey) {
-               lastStep = matchingKey.to;
+               lastStep = allKeys[matchingKey].to;
                retval.push(keyToCheck);
                keysRemaining.splice(i,1);
                break;
             } else {
                matchingKey = _.find(priorKeys, toMatchesPriorFrom);
                if (matchingKey) {
-                  lastStep = matchingKey.from;
+                  lastStep = allKeys[matchingKey].from;
                   retval.push(reverseKey(keyToCheck));
                   keysRemaining.splice(i,1);
                   break;
@@ -159,7 +177,7 @@ createPathFromKeySet = function(allKeys, keys, priorKeys, to, from) {
 
       // need to go through remaining keys to see how they hook up
       // for now, we only handle simplest case of a straight line
-      var done = false;
+      var done = (keysRemaining.length===0);
       do {
          // find the step starting at lastStep
          l = keysRemaining.length;
@@ -194,7 +212,7 @@ createStringFromPath = function(path) {
    var retval;
 
    retval = _.reduce(path, function(str, item, index) {
-      return str + (index!==0 ? '->' :'') + item.from + '(' + item.name + ')';
+      return str + (index!==0 ? '->' :'') + item.from + ' (' + item.name + ')';
    }, '');
 
    retval += '->' + path[path.length-1].to;
@@ -217,6 +235,7 @@ reverseKey = function(key) {
 
 // returns array of the keySets in setsToCheck that contain all of the
 //    requiredKeys (or, if none, the original node)
+// requiredKeys should be list of key IDs
 getPossibleKeySets = function(setsToCheck, requiredKeys, originalNode) {
    var retval = [];
 
@@ -243,6 +262,7 @@ getPossibleKeySets = function(setsToCheck, requiredKeys, originalNode) {
 // note: this is safe because everything in the incoming setsToClean
 //    must touch the collection we're trying to get to, so if it's a
 //    subset of something else, then the extra path must be extraneous
+// selectedKeys should be list of key IDs
 cleanupKeySets = function(setsToClean, selectedKeys) {
    var filteredSets = [];
 
@@ -266,7 +286,7 @@ cleanupKeySets = function(setsToClean, selectedKeys) {
       // sort by length so we can check the longest first (why?  because if
       //    we can eliminate with a smaller set before having to check a
       //    longer one, that's better)
-      _.sortBy(filteredSets, function(keyList) { return keyList.length; });
+      filteredSets = _.sortBy(filteredSets, function(keyList) { return keyList.length; });
       setContains = function(item) { return _.contains(filteredSets[j],item); };
 
       for (i=0; i<l; i++) {

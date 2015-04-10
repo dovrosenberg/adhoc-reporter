@@ -1,6 +1,6 @@
 Package.describe({
   name: 'dovrosenberg:ad-hoc-reporter',
-  version: '0.1.3',
+  version: '0.2.0',
   summary: 'The beginning of an ad-hoc reporting package',
   git: 'https://github.com/dovrosenberg/adhoc-reporter',
   documentation: 'README.md'
@@ -12,6 +12,8 @@ Package.onUse(function(api) {
   api.addFiles([
      './client/bs-collapse-panel/bs-collapse-panel.html',
      './client/bs-collapse-panel/bs-collapse-panel.js',
+     './client/modal.html',
+     './client/modal.js',
      './client/reporter.html',
      './client/keySets.js',
      './client/reporter.js'
@@ -30,12 +32,13 @@ Package.onUse(function(api) {
   api.use([
      'standard-app-packages',    // TODO: maybe just include the ones we really need
      'reactive-var',
-     'uzumaxy:jstree@3.0.9'
-     //'aldeed:tabular'          // TODO: reincorporate once pull request is merged
+     'uzumaxy:jstree@3.0.9',
+     'pahans:reactive-modal@1.0.2'
+     //'aldeed:tabular'          // TODO: reincorporate once pull request is merged (and then remove all the extra files, etc. below)
      //'mizzao:user-status'      // TODO: use this to automatically clean up query results on server when user logs out
   ]);
 
-// tabular
+// tabular - remove everything from here down once tabular package is incorporated directly
 api.use(['check', 'underscore', 'mongo', 'blaze', 'templating', 'reactive-var', 'tracker']);
 
 api.use(['meteorhacks:subs-manager@1.2.0'], ['client', 'server'], {weak: true});

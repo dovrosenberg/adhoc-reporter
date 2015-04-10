@@ -96,7 +96,6 @@ Template.reporter.rendered = function(){
          isLoading.set(true);
 
          if (addCollection) {
-
             // see if we're turning this node on or off
             if (curNode.state.selected) {
                // turning on - disable any trees no longer available
@@ -129,19 +128,21 @@ Template.reporter.rendered = function(){
                   if (cleanedSets.length>1) {
                      // show the different possibilities - get a cleaned up list of choices
                      //    and then let the user pick from them
-                     _.each(cleanedSets, function(set) { console.log(createStringFromPath(createPathFromKeySet(template.allKeys, set, template.selectedKeys, clickedCollection, template.originalNode))); });
-                     chosenKeySet = cleanedSets[0];
-                  } else
-                     chosenKeySet = cleanedSets[0];
+                     var pathStrings = _.map(cleanedSets, function(set) {
+                        return createStringFromPath(createPathFromKeySet(template.allKeys, set, template.selectedKeys, clickedCollection, template.originalNode));
+                     });
 
-                  // add all of the keys in the selected keySet to the list of
-                  //    selected keys
-                  _.each(chosenKeySet, function(item) {
-                     if (!_.contains(template.selectedKeys, item))
-                        template.selectedKeys.push(template.allKeys[item]);
-                  });
+                     // show the modal
+                     var modal = createModal(clickedCollection, pathStrings, cleanedSets, template, templateData, data);
+                     modal.show();
 
-                  // don't have to turn anything off because after 1st node is picked,
+                     // we're done because we can't add the new collection until the modal returns
+                     return;
+                  } else {
+                     selectCleanedSet(cleanedSets[0]);
+                  }
+
+                  // don't have to turn anything off in the tree because after 1st node is picked,
                   //    everything left can be connected somehow
                }
             } else {
@@ -150,35 +151,7 @@ Template.reporter.rendered = function(){
             }
          }
 
-         var selectedFields = _.map(data.selected, function(item) {
-            var node = data.instance.get_node(item);
-            return node;
-         });
-         var ID = makeID();
-
-         Meteor.call('createResultsSet', ID, selectedFields, template.selectedKeys);
-
-         var columns = _.map(selectedFields, function(item) {
-            return {
-               data: item.id,
-               title: item.text
-            };
-         });
-         if (columns.length===0)
-            TabularTables.Results.set(null);
-         else {
-            //wait until server has created the data; need this because
-            //    tabular doesn't reactively show new data, but even
-            //    if it did, I don't think we'd want to see the data
-            //    loading incrementally
-            template.autorun(function(computation){
-               if (ReporterResultsReady.find({queryID:ID, ready:true}).count()>0) {
-                  isLoading.set(false);
-                  Meteor.call('createTabularTable',columns, ID, templateData.tableDOM);
-                  computation.stop();
-               }
-            });
-         }
+         finishLoadingData(template, templateData, data);
       }
    )
    .jstree({
@@ -197,3 +170,43 @@ Template.reporter.events({
        $('#collectionTree').jstree('refresh',false,true);
    }
 });
+
+// chosenKeyList is an array of key IDs
+selectCleanedSet = function(chosenKeyList) {
+   _.each(chosenKeyList, function(item) {
+      if (!_.contains(template.selectedKeys, item))
+         template.selectedKeys.push(item);
+   });
+};
+
+finishLoadingData = function(template, templateData, data) {
+   var selectedFields = _.map(data.selected, function(item) {
+      var node = data.instance.get_node(item);
+      return node;
+   });
+   var ID = makeID();
+
+   Meteor.call('createResultsSet', ID, selectedFields, _.map(template.selectedKeys, function(key) { return template.allKeys[key]; }));
+
+   var columns = _.map(selectedFields, function(item) {
+      return {
+         data: item.id,
+         title: item.text
+      };
+   });
+   if (columns.length===0)
+      TabularTables.Results.set(null);
+   else {
+      //wait until server has created the data; need this because
+      //    tabular doesn't reactively show new data, but even
+      //    if it did, I don't think we'd want to see the data
+      //    loading incrementally
+      template.autorun(function(computation){
+         if (ReporterResultsReady.find({queryID:ID, ready:true}).count()>0) {
+            isLoading.set(false);
+            Meteor.call('createTabularTable',columns, ID, templateData.tableDOM);
+            computation.stop();
+         }
+      });
+   }
+};
