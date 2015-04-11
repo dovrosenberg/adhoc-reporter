@@ -1,6 +1,6 @@
 Package.describe({
   name: 'dovrosenberg:ad-hoc-reporter',
-  version: '0.2.0',
+  version: '0.3.0',
   summary: 'The beginning of an ad-hoc reporting package',
   git: 'https://github.com/dovrosenberg/adhoc-reporter',
   documentation: 'README.md'

@@ -131,8 +131,7 @@ loadAllData = function(ID, selectedKeys, selectedFields) {
          }
 
          // load the collection, including any key fields
-         var fields = fieldsByCol[nextCol];
-         var newData = loadCollection(nextCol, fields);
+         var newData = loadCollection(nextCol, fieldsByCol[nextCol]);
 
          // merge it to cumulative data
          cumulativeData = innerJoin(cumulativeData, newData,

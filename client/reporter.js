@@ -9,41 +9,7 @@ Template.reporterResults.helpers({
 Template.reporter.created = function(){
    var template = Template.instance();
 
-    // parse the schema into our format
-    template.schema = [];
-    var collections = template.data.collections;
-    var schemas = template.data.schemas;
-
-    _.each(collections, function(item, index) {
-      var collectionData = {
-         text: item.label,    // collection label
-         id: item.name,
-         state: {
-            opened: true
-         },
-         children: []
-      };
-
-      // read the schema from the corresponding schema item
-      _.each(schemas[index], function(value, key) {
-         var child = {
-            id: key + ':' + item.name,    //use ':' because item.name can't start with it
-            text: value.label,
-            data: {
-               fieldName: key,
-               collectionName: item.name
-            }
-         };
-
-         collectionData.children.push(child);
-      });
-
-      template.schema.push(collectionData);
-   });
-
-   // convert the list of foreign keys into a complete map of all of the
-   //   collections connected to any others
-   // a "keySet" is a set of keys that go together to connect a set of collections
+    // a "keySet" is a set of keys that go together to connect a set of collections
    /* a keySet: {
          collections: ['a','b','c'],   // list of collecions hit
          keys: ['dskjhKASDFw3r9hASFHs','dskjhKAfdFw3r9hASFHs']    // list of keys used
@@ -53,13 +19,45 @@ Template.reporter.created = function(){
    template.keySetsByCollection = {}; // keyed by collection name, with each element an array of all keySets containing that collection
    template.allKeys = {};
    template.canReachFromCollection = {}; // keyed by collection name, with each element an array of all collections sharing a keySet with that one
+   template.formats = {};  // keyed by field ID
 
-   // convert foreignKeys object structure into a simple one keyed by ID
-   //    with the from and ID fields added
-   // then add each one into the keySets
-   _.each(template.data.foreignKeys, function(keyList, fromCol) {
-      _.each(keyList, function(keyObject) {
-         keyObject.from = fromCol;
+   // parse the schema into our format
+   template.schema = [];
+   var schemas = template.data.schemas;
+   var formats = template.data.formats;
+
+    _.each(schemas, function (collection, colName) {
+      var collectionData = {
+         text: collection.label,
+         id: colName,
+         state: {
+            opened: true
+         },
+         children: []
+      };
+
+      // read the schema from the corresponding schema item
+      _.each(collection.fields, function(fieldDetail, fieldName) {
+         var child = {
+            id: fieldName + ':' + colName,    //use ':' because item.name can't start with it
+            text: fieldDetail.label,
+            data: {
+               fieldName: fieldName,
+               collectionName: colName
+            }
+         };
+         if (formats)         // I wanted to add these to child.data, but they keep disappearing from  the object
+            template.formats[child.id] = formats[fieldDetail.format];
+
+         collectionData.children.push(child);
+      });
+
+      template.schema.push(collectionData);
+
+      // convert the list of foreign keys into a complete map of all of the collections connected to any others
+      // then add each one into the keySets
+      _.each(collection.foreignKeys, function(keyObject) {
+         keyObject.from = colName;
          keyObject.ID =  makeID();
 
          template.allKeys[keyObject.ID] = keyObject;
@@ -189,10 +187,17 @@ finishLoadingData = function(template, templateData, data) {
    Meteor.call('createResultsSet', ID, selectedFields, _.map(template.selectedKeys, function(key) { return template.allKeys[key]; }));
 
    var columns = _.map(selectedFields, function(item) {
-      return {
+      var retval = {
          data: item.id,
          title: item.text
       };
+
+      if (template.formats[item.id])
+         retval.render = function(data,type,row,meta) {
+            return template.formats[item.id](data);
+         };
+
+      return retval;
    });
    if (columns.length===0)
       TabularTables.Results.set(null);
