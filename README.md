@@ -38,7 +38,7 @@ You also need to have some version of bootstrap 3 installed, including modal.js.
 Parameters:
 * schemas (required): an object showing the collections and fields you want to include. The format of the object is:
 
-       {
+        {
             'Books': {                  // the name of the Meteor collection object
                label: 'Books',          // the text to display the user when referring to the collection (ex. in the treeview)
                fields: {
@@ -65,9 +65,11 @@ Parameters:
    Note: you only need to include fields that you want to be reportable here.  You DO NOT need to include key fields unless you want the user to actually see the values of those fields.
 
    Note: foreign keys should only be described in one collection, as they are reversed by the package.  That is, you should not describe the relationship shown above under the "Authors" collection as well.  
+   
+   Note: version 0.3 specifies a different, incompatible schema format than prior versions 
 * formats (optional): an object describing any available custom formatting functions.  The format of the object (no pun intended) is:
 
-       {
+        {
             'dollars':
                function (amount) {
             	   return accounting.formatNumber(amount,2);
