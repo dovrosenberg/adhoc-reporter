@@ -1,5 +1,5 @@
 <template name="reporter">
-   {{!-- requires collections, schemas, glyphicons --}}
+   {{!-- requires schemas, formats, glyphicons --}}
    <div class="container-fluid">
       <div class="row">
          <div class="col-xs-2 container-fluid">
@@ -7,38 +7,14 @@
                <button class="btn" id="resetTree">Reset</button>
             </div>
             <div class="row" style="overflow:auto">
-               <div id="collectionTree"></div>
+               <div id="ahr-collectionTree"></div>
             </div>
           </div>
           <div class="col-xs-10">
-             {{> resultsCollapsible_panel body='reporterFiltering' data=this title='Filtering' collapsed=false glyphicon=glyphicons}}
+             {{> reporterFiltering schema=getSchema fields=getFields reachableCollections=reachableCollections glyphicons=glyphicons}}
 
-             <div class="panel panel-default">
-                <div class="panel-heading">
-                   Results
-                </div>
-
-                <div class="panel-body">
-                   {{> reporterResults }}
-               </div>
-             </div>
+             {{> reporterResults selector=selector tableDOM=tableDOM}}
           </div>
        </div>
     </div>
-</template>
-
-<template name="reporterResults">
-   {{#if isLoading}}
-      Loading...
-   {{else}}
-      {{#if hasResultsTable}}
-         {{!--R option requires ColReorder plugin in client/compatibility --}}
-         {{!--T option requires tabletools plugin in client/compatibility and swf in public/swf --}}
-         {{> tabular table=resultsTable tableDOM=tableDOM class="table table-striped table-condensed"}}
-      {{/if}}
-   {{/if}}
-</template>
-
-<template name="reporterFiltering">
-   Filtering
 </template>

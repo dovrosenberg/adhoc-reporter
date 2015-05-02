@@ -1,0 +1,141 @@
+<template name="inputRow">
+   {{!-- requires fields, schema, numFilters, reachableCollections --}}
+	<tr>
+      <td class="text-right">
+         {{filterNum}}
+      </td>
+		<td span="2">
+         <!--<div class="container-fluid">
+            <div class="row">
+               <div class="col-xs-4">-->
+               <div class="form-inline">
+                  <select id="ahr-chooseField" class="form-control input-sm" style="max-width:33%">
+                     {{> fieldOptions schema=schema reachableSchema=reachableSchema}}
+                  </select>
+               <!--</div>-->
+               {{> properInputs fieldId=fieldId fieldType=fieldType}}
+            </div>
+            <!--</div>
+         </div>-->
+		</td>
+	</tr>
+</template>
+
+<template name="fieldOptions">
+   {{!-- requires schema, reachableSchema --}}
+
+   {{#each reachableSchema}}
+      <optGroup label="{{text}}">
+         {{#each children}}
+            <option value="{{id}}">{{text}}</option>
+         {{/each}}
+      </optGroup>
+   {{/each}}
+</template>
+
+<template name="properInputs">
+   {{!-- requires fieldId, fieldType --}}
+   {{#if isDate}}
+      <select id="ahr-chooseDateSelector" class="form-control input-sm" style="max-width:20%">
+         <option value=""></option>
+         <option value="onOrBefore">On or before</option>
+         <option value="onOrAfter">On or after</option>
+         <option value="customDate">Custom range</option>
+         <optGroup label="Year">
+            <option value="currentYear">Current year</option>
+            <option value="lastYear">Last year</option>
+            <option value="nextYear">Next year</option>
+            <option value="yearToDate">Year to date</option>
+         </optGroup>
+         <optGroup label="Quarter">
+            <option value="currentQuarter">Current quarter</option>
+            <option value="lastQuarter">Last quarter</option>
+            <option value="nextQuarter">Next quarter</option>
+            <option value="quarterToDate">Quarter to date</option>
+         </optGroup>
+         <optGroup label="Month">
+            <option value="currentMonth">Current month</option>
+            <option value="lastMonth">Last month</option>
+            <option value="nextMonth">Next month</option>
+            <option value="monthToDate">Month to date</option>
+         </optGroup>
+         <optGroup label="Week">
+            <option value="currentWeek">Current week</option>
+            <option value="lastWeek">Last week</option>
+            <option value="nextWeek">Next week</option>
+            <option value="weekToDate">Week to date</option>
+         </optGroup>
+         <optGroup label="Day">
+            <option value="today">Today</option>
+            <option value="yesterday">Yesterday</option>
+            <option value="tomorrow">Tomorrow</option>
+            <option value="lastNDays">Last ___ days</option>
+            <option value="nextNDays">Next ___ days</option>
+         </optGroup>
+      </select>
+   {{/if}}
+   {{#if isBoolean}}
+      <select id="ahr-chooseBoolean" class="form-control input-sm" style="max-width:20%">
+         <option value=""></option>
+         <option value="true">Yes</option>
+         <option value="false">No</option>
+      </select>
+   {{/if}}
+   {{#if isNumber}}
+      <select id="ahr-chooseNumberSelector" class="form-control input-sm" style="max-width:20%">
+         <option value=""></option>
+         <option value="$eq">equals</option>
+         <option value="$ne">not equal to</option>
+         <option value="$gt">greater than</option>
+         <option value="$gte">greater or equal to</option>
+         <option value="$lt">less than</option>
+         <option value="$lte">less or equal to</option>
+         <option value="between">between</option>
+         <!--<option value="$in">in</option>
+         <option value="$nin">not in</option>-->
+      </select>
+   {{/if}}
+   {{#if isString}}
+      <select id="ahr-chooseStringSelector" class="form-control input-sm" style="max-width:20%">
+         <option value=""></option>
+         <option value="$eq">equals</option>
+         <option value="$ne">not equal to</option>
+         <option value="contains">contains</option>
+         <option value="startsWith">starts with</option>
+         <!--<option value="$in">in</option>
+         <option value="$nin">not in</option>-->
+      </select>
+   {{/if}}
+
+   <br/>
+
+   {{#if somethingSelected}}
+      {{#if isNumber}}
+         {{#if between}}
+            {{> inputBox id="ahr-filterInput-1"}} and {{> inputBox id="ahr-filterInput-2"}}
+         {{else}}
+            {{> inputBox id="ahr-filterInput-1"}}
+         {{/if}}
+      {{/if}}
+      {{#if isDate}}
+         {{#if customDate}}
+            from {{> inputBox id="ahr-filterInput-1" class="datepicker"}} to {{> inputBox id="ahr-filterInput-2" class="datepicker"}}
+         {{/if}}
+         {{#if singleInputDate}}
+            {{> inputBox id="ahr-filterInput-1" class="datepicker"}}
+         {{/if}}
+      {{/if}}
+      {{#if isString}}
+         {{> inputBox id="ahr-filterInput-1"}}
+      {{/if}}
+   {{/if}}
+   {{#if showAdd}}
+      <button id="ahr-btnAddFilter" class="btn btn-xs">Add</button>
+   {{/if}}
+   <button id="ahr-btnCancelFilter" class="btn btn-xs">Cancel</button>
+</template>
+
+<template name="inputBox">
+   {{!-- take ID and class (only needed for extra ones) --}}
+   <input id="{{id}}" class="form-control input-sm {{class}}">
+</template>

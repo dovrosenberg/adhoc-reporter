@@ -1,0 +1,14 @@
+<template name="logicRow">
+   {{!-- requires filterRows, combinatorErrors, startingCombinator --}}
+   <tr>
+		<td colspan="2" class="container-fluid">
+         <div class="row">
+            <div class="col-xs-9">
+               <input id="combinator" class="form-control input-sm col-xs-9">
+            </div>
+            <button id="ahr-btnResetCombinator" class="btn btn-xs">Reset</button>
+         </div>
+         <span class="text-danger">{{combinatorErrors}}</span>
+      </td>
+	</tr>
+</template>

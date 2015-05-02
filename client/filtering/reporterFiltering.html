@@ -1,0 +1,83 @@
+<template name="reporterFiltering">
+   {{!-- requires glyphicons, schema, reachableCollections --}}
+   <div class="panel panel-default collapsible-panel">
+		<div class="panel-heading">
+			Filtering
+			<span id="clickableSpan" class="pull-right clickable" style="margin-top: -20px; font-size: 15px; cursor:pointer">
+				{{#if glyphicons}}
+					<span class="glyphicon glyphicon-chevron-up"></span>
+				{{else}}
+					<span class="fa fa-chevron-up"></span>
+				{{/if}}
+			</span>
+		</div>
+		<div class="panel-body collapsible-panel-body {{#if collapsed}}panel-collapsed{{/if}}" style="{{#if collapsed}}display:none;{{/if}}">
+         {{#if reachableCollections}}
+            <div class="container-fluid">
+               <div class="row">
+                  <div class="col-xs-1">
+                     <label class="control-label">Filters</label>
+                  </div>
+                  <div class="col-xs-11">
+                     <div class="dropdown">
+                       <button class="btn btn-default dropdown-toggle btn-xs" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
+                         Add
+                         <span class="caret"></span>
+                       </button>
+                       <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+                         <li role="presentation" id="addFilter"><a role="menuitem" tabindex="-1" href="#">
+                            Field criteria filter<br/>e.g. Field 1 <b>equals</b> 7
+                         </a></li>
+<!--                         <li class ="divider"></li>
+                         <li role="presentation"><a role="menuitem" tabindex="-1" href="#">
+                            Filter logic<br/>e.g. Filter 1 <b>OR</b> (Filter 2 <b>AND</b> Filter 3)
+                         </a></li>-->
+                       </ul>
+                     </div>
+                  </div>
+               </div>
+               <div class="row">
+               </div>
+               <div class="row">
+                  <div class="col-xs-12">
+                     <table class="table">
+                        <thead><tr>
+                           <td class="col-xs-1"></td>
+                           <td class="col-xs-10"></td>
+                           <td class="col-xs-1"></td>
+                        </tr></thead>
+         					<tbody>
+                           {{#if showLogicRow}}
+                              {{> logicRow combinatorErrors=combinatorErrors startingCombinator=combinator filterRows=filterRows}}
+                           {{/if}}
+         						{{#each filterRows}}
+         							{{> filterRow }}
+         						{{/each}}
+                           {{#if showInputRow}}
+                              {{> inputRow schema=schema fields=fields reachableCollections=reachableCollections numFilters=filterRows.length}}
+                           {{/if}}
+         					</tbody>
+         				</table>
+                  </div>
+               </div>
+            </div>
+         {{else}}
+            You must select at least one reporting field before you can set filters.
+         {{/if}}
+		</div>
+	</div>
+</template>
+
+<template name="filterRow">
+	<tr>
+      <td class="text-right">
+         {{index}}
+      </td>
+		<td>
+         {{{text}}}
+		</td>
+      <td>
+         <button id="ahr-btnDelFilter" class="btn btn-xs">Delete</button>
+      </td>
+	</tr>
+</template>

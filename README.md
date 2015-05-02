@@ -9,16 +9,18 @@ The beginnings of an ad hoc reporter package for meteor
 * Allows for specification of field types (currency, date, etc.) and application of custom formatting based on those field types
 * Based on a defined schema, identifies all possible paths between collections and automatically joins tables correctly without user intervention
 * DataTables for output supports sorting, paging, exporting to Excel/pdf/etc
+* Advanced filtering options based on type of field, as well as ability to specify boolean logic
 
 ## Future features
-* Drag and drop fields into the report because multi-select interface is non-obvious
+* Drag and drop fields into and out of the report
 * Prettify the package appearance generally (better loading screens, etc.)
-* Allow filtering, grouping, formula fields
+* Allow grouping, formula fields
 * Support subdocuments
 * Add some tests for package maintenance
 
 ## Other things perhaps it should do (but not even on the roadmap yet)
 * Make UI more template driven for better visual integration into Meteor apps
+* Adapt UI for smaller screens (mobile)
 
 ## Known bugs
 * Doesn't support removing fields from the report
@@ -29,7 +31,7 @@ The beginnings of an ad hoc reporter package for meteor
 
 `meteor add dovrosenberg:ad-hoc-reporter`
 
-You also need to have some version of bootstrap 3 installed, including modal.js.  And Font Awesome or Glyphicons (for glyphicon-chevron-down/fa-chevron-down and  glyphicon-chevron-up/fa-chevron-up)
+You also need to have some version of bootstrap 3 installed, including modal.js and dropdown.js.  And Font Awesome or Glyphicons (for glyphicon-chevron-down/fa-chevron-down and  glyphicon-chevron-up/fa-chevron-up)
 
 **To use:**
 
@@ -44,7 +46,8 @@ Parameters:
                fields: {
                   title: {              // the field name
                       label: 'Title',   // the text label to display the user when referring to this field
-                      format: 'Title text'  // optional, the name of format function (see below) to be applied
+                      format: 'Title text',  // optional, the name of format function (see below) to be applied
+                      type: 'String'    // optional, used to ensure filtering/sorting works properly ('Number', 'Boolean', or 'Date'... anything else ignored and assumed to be String)
                   },
                   ...
                },
@@ -65,8 +68,8 @@ Parameters:
    Note: you only need to include fields that you want to be reportable here.  You DO NOT need to include key fields unless you want the user to actually see the values of those fields.
 
    Note: foreign keys should only be described in one collection, as they are reversed by the package.  That is, you should not describe the relationship shown above under the "Authors" collection as well.  
-   
-   Note: version 0.3 specifies a different, incompatible schema format than prior versions 
+
+   Note: version 0.3 specifies a different, incompatible schema format than prior versions
 * formats (optional): an object describing any available custom formatting functions.  The format of the object (no pun intended) is:
 
         {

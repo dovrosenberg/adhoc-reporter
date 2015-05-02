@@ -1,0 +1,20 @@
+<template name="reporterResults">
+   {{!-- requires selector, tableDOM --}}
+   <div class="panel panel-default">
+      <div class="panel-heading">
+         Results
+      </div>
+
+      <div class="panel-body">
+         {{#if isLoading}}
+            <h1 class="text-center">Loading...</h1>
+         {{else}}
+            {{#if hasResultsTable}}
+               {{!--R option requires ColReorder plugin in client/compatibility --}}
+               {{!--T option requires tabletools plugin in client/compatibility and swf in public/swf --}}
+               {{> tabular table=resultsTable tableDOM=tableDOM selector=selector class="table table-striped table-condensed"}}
+            {{/if}}
+         {{/if}}
+      </div>
+   </div>
+</template>

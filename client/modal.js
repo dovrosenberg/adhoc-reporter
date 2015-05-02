@@ -1,4 +1,4 @@
-createModal = function(collection, paths, cleanedSets, template, templateData, data) {
+createModal = function(collection, paths, cleanedSets, template) {
    var shareDialogInfo = {
        template: Template.selectPathBody,
        title: "How would you like to add " + collection + "?",
@@ -28,7 +28,7 @@ createModal = function(collection, paths, cleanedSets, template, templateData, d
       var selectedItem = parseInt($('input[name=pathRadios]:checked', '#pathForm').val());
 
       selectCleanedSet(cleanedSets[selectedItem]);
-      finishLoadingData(template, templateData, data);
+      finishLoadingData(template);
 
       dialog.hide();
     });
