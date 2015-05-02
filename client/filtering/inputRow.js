@@ -90,7 +90,7 @@ Template.properInputs.events({
       var selectedOpt = $('#ahr-chooseField option:selected');
 
       var newSelector = createSelector(this.fieldId, selectedOpt.text(), selectedOpt.parent()[0].label,
-            this.fieldType, template.selectorName.get(),
+            this.fieldType, template.parent(3).formats[this.fieldId], template.selectorName.get(),
             $('#ahr-filterInput-1').val(), $('#ahr-filterInput-2').val());
       var filterRows = template.parent(2).filterRows.get();
       newSelector.index = filterRows.length+1;
@@ -109,7 +109,7 @@ Template.properInputs.events({
    }
 */
 // TODO: pass in fieldname for the text output and the format function to apply for text output
-function createSelector(fieldId, fieldText, collectionText, fieldType, selectorName, box1, box2) {
+function createSelector(fieldId, fieldText, collectionText, fieldType, formatFn, selectorName, box1, box2) {
    var retval = {
       text: '',
       selector: {},
@@ -126,6 +126,8 @@ function createSelector(fieldId, fieldText, collectionText, fieldType, selectorN
    };
    var gte = {}, lte = {};
 
+   var applyFormat = (formatFn || function(data) { return data; });
+
    switch (fieldType) {
       case 'Number':
          switch (selectorName) {
@@ -137,18 +139,18 @@ function createSelector(fieldId, fieldText, collectionText, fieldType, selectorN
                retval.selector[fieldId] = {};
                retval.selector[fieldId][selectorName] = Number(box1);
                retval.text = '<mark>' + fieldName + '</mark> ' + numLookup[selectorName] +
-                     ' <mark>' + box1 + '</mark>';
+                     ' <mark>' + applyFormat(box1) + '</mark>';
                break;
             case '$eq':
                retval.selector[fieldId] = Number(box1);
-               retval.text = '<mark>' + fieldName + '</mark> equals <mark>' + box1 + '</mark>';
+               retval.text = '<mark>' + fieldName + '</mark> equals <mark>' + applyFormat(box1) + '</mark>';
                break;
             case 'between':
                gte[fieldId] = {$gte: Number(box1)};
                lte[fieldId] = {$lte: Number(box2)};
                retval.selector = {$and: [gte, lte]};
-               retval.text = '<mark>' + fieldName + '</mark> between <mark>' + box1 +
-                     '</mark> and <mark>' + box2 + '</mark>';
+               retval.text = '<mark>' + fieldName + '</mark> between <mark>' + applyFormat(box1) +
+                     '</mark> and <mark>' + applyFormat(box2) + '</mark>';
          }
          break;
       case 'Date':
@@ -156,11 +158,11 @@ function createSelector(fieldId, fieldText, collectionText, fieldType, selectorN
          if (selectorName==='onOrBefore') {
             retval.selector[fieldId] = {};
             retval.selector[fieldId].$lte = moment(box1,["M-D-YYYY","M-D-YY"]).toISOString();
-            retval.text = '<mark>' + fieldName + '</mark> on or before <mark>'  + box1 + '</mark>';
+            retval.text = '<mark>' + fieldName + '</mark> on or before <mark>'  + applyFormat(box1) + '</mark>';
          } else if (selectorName==='onOrAfter'){
             retval.selector[fieldId] = {};
             retval.selector[fieldId].$gte = moment(box1,["M-D-YYYY","M-D-YY"]).toISOString();
-            retval.text = '<mark>' + fieldName + '</mark> on or after <mark>'  + box1 + '</mark>';
+            retval.text = '<mark>' + fieldName + '</mark> on or after <mark>'  + applyFormat(box1) + '</mark>';
          } else {
             // find the correct start and end dates
             var date1, date2;
@@ -169,8 +171,8 @@ function createSelector(fieldId, fieldText, collectionText, fieldType, selectorN
                case 'customDate':
                   date1 = moment(box1,["M-D-YYYY","M-D-YY"]);
                   date2 = moment(box2,["M-D-YYYY","M-D-YY"]).endOf('day');
-                  retval.text = '<mark>' + fieldName + '</mark> between <mark>'  + date1.toISOString() +
-                        '</mark> and <mark>' + date2.toISOString() + '</mark>';
+                  retval.text = '<mark>' + fieldName + '</mark> between <mark>'  + applyFormat(date1) +
+                        '</mark> and <mark>' + applyFormat(date2) + '</mark>';
 
                   // TODO: throw formatting errors throughout this section and display somewhere
                   break;
@@ -294,20 +296,20 @@ function createSelector(fieldId, fieldText, collectionText, fieldType, selectorN
                //   the string; then could just search the lowercase version here, but use the
                //   other for displaying
                retval.selector[fieldId] = new RegExp(box1,'i');
-               retval.text = '<mark>' + fieldName + '</mark> equals <mark>' + box1 + '</mark>';
+               retval.text = '<mark>' + fieldName + '</mark> equals <mark>' + applyFormat(box1) + '</mark>';
                break;
             case '$ne':
                retval.selector[fieldId] = {};
                retval.selector[fieldId].$not = new RegExp(box1,'i');
-               retval.text = '<mark>' + fieldName + '</mark> is not equal to <mark>' + box1 + '</mark>';
+               retval.text = '<mark>' + fieldName + '</mark> is not equal to <mark>' + applyFormat(box1) + '</mark>';
                break;
             case 'contains':
                retval.selector[fieldId] = new RegExp('*' + box1 + '*$','i');
-               retval.text = '<mark>' + fieldName + '</mark> contains <mark>' + box1 + '</mark>';
+               retval.text = '<mark>' + fieldName + '</mark> contains <mark>' + applyFormat(box1) + '</mark>';
                break;
             case 'startsWith':
                retval.selector[fieldId] = new RegExp(box1 + '*$','i');
-               retval.text = '<mark>' + fieldName + '</mark> starts with <mark>' + box1 + '</mark>';
+               retval.text = '<mark>' + fieldName + '</mark> starts with <mark>' + applyFormat(box1) + '</mark>';
          }
          break;
       case 'Boolean':

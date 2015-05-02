@@ -1,17 +1,10 @@
 <template name="reporterFiltering">
-   {{!-- requires glyphicons, schema, reachableCollections --}}
+   {{!-- requires schema, reachableCollections --}}
    <div class="panel panel-default collapsible-panel">
 		<div class="panel-heading">
 			Filtering
-			<span id="clickableSpan" class="pull-right clickable" style="margin-top: -20px; font-size: 15px; cursor:pointer">
-				{{#if glyphicons}}
-					<span class="glyphicon glyphicon-chevron-up"></span>
-				{{else}}
-					<span class="fa fa-chevron-up"></span>
-				{{/if}}
-			</span>
 		</div>
-		<div class="panel-body collapsible-panel-body {{#if collapsed}}panel-collapsed{{/if}}" style="{{#if collapsed}}display:none;{{/if}}">
+		<div class="panel-body">
          {{#if reachableCollections}}
             <div class="container-fluid">
                <div class="row">

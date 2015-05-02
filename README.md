@@ -31,7 +31,7 @@ The beginnings of an ad hoc reporter package for meteor
 
 `meteor add dovrosenberg:ad-hoc-reporter`
 
-You also need to have some version of bootstrap 3 installed, including modal.js and dropdown.js.  And Font Awesome or Glyphicons (for glyphicon-chevron-down/fa-chevron-down and  glyphicon-chevron-up/fa-chevron-up)
+You also need to have some version of bootstrap 3 installed, including modal.js and dropdown.js.
 
 **To use:**
 
@@ -87,7 +87,6 @@ Parameters:
         }
 
 * tableDOM (optional): a string to be passed to the dom property of the DataTable containing the results (see https://datatables.net/reference/option/dom for more information.)  And DataTables extensions (css and js) you require should be placed into your /client/compatibility directory.  And if you want to use the tabletools extension, you should also place the swf file in public/swf.
-* glyphicons (not required, but defaults to false): if true, uses Glyphicons for the collapsible panel icons; if false, uses Font Awesome
 
 
 ## License

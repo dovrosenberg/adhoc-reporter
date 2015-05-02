@@ -269,10 +269,11 @@ finishLoadingData = function(template) {
          type: (item.type==='Number' ? 'num-fmt' : (item.type==='Date' ? 'date' : 'string'))
       };
 
-      if (template.formats[item.id])
+      if (template.formats[item.id]) {
          retval.render = function(data,type,row,meta) {
             return template.formats[item.id](data);
          };
+      }
 
       return retval;
    });

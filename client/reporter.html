@@ -1,5 +1,5 @@
 <template name="reporter">
-   {{!-- requires schemas, formats, glyphicons --}}
+   {{!-- requires schemas, formats --}}
    <div class="container-fluid">
       <div class="row">
          <div class="col-xs-2 container-fluid">
@@ -11,7 +11,7 @@
             </div>
           </div>
           <div class="col-xs-10">
-             {{> reporterFiltering schema=getSchema fields=getFields reachableCollections=reachableCollections glyphicons=glyphicons}}
+             {{> reporterFiltering schema=getSchema fields=getFields reachableCollections=reachableCollections }}
 
              {{> reporterResults selector=selector tableDOM=tableDOM}}
           </div>
